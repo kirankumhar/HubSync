@@ -2,116 +2,88 @@
   "histories": {
     "__system__": [
       [
-        "[13:30] Server started\n",
+        "[15:58] Server started\n",
         "system"
       ],
       [
-        "[13:30] My IP: 192.168.29.23\n",
+        "[15:58] My IP: 192.168.29.23\n",
         "peer"
       ],
       [
-        "[13:30] Scanning network...\n",
+        "[15:58] Scanning network...\n",
         "system"
       ],
       [
-        "[13:30] Scan completed\n",
-        "system"
-      ],
-      [
-        "[14:27] Server started\n",
-        "system"
-      ],
-      [
-        "[14:27] My IP: 192.168.29.23\n",
-        "peer"
-      ],
-      [
-        "[14:27] Scanning network...\n",
-        "system"
-      ],
-      [
-        "[14:27] Scan completed\n",
-        "system"
-      ],
-      [
-        "[14:28] Scanning network...\n",
-        "system"
-      ],
-      [
-        "[14:28] Scan completed\n",
-        "system"
-      ],
-      [
-        "[14:29] Server started\n",
-        "system"
-      ],
-      [
-        "[14:29] My IP: 192.168.29.23\n",
-        "peer"
-      ],
-      [
-        "[14:29] Scanning network...\n",
-        "system"
-      ],
-      [
-        "[14:29] Scan completed\n",
-        "system"
-      ],
-      [
-        "[15:03] Scanning network...\n",
-        "system"
-      ],
-      [
-        "[15:03] Scan completed\n",
-        "system"
-      ],
-      [
-        "[15:08] Server started\n",
-        "system"
-      ],
-      [
-        "[15:08] My IP: 192.168.29.23\n",
-        "peer"
-      ],
-      [
-        "[15:08] Scanning network...\n",
-        "system"
-      ],
-      [
-        "[15:08] Scan completed\n",
-        "system"
-      ],
-      [
-        "[15:09] Scanning network...\n",
-        "system"
-      ],
-      [
-        "[15:09] Scan completed\n",
+        "[15:58] Scan completed\n",
         "system"
       ]
     ],
     "192.168.29.32": [
       [
-        "[13:32] Me: Hello\n",
+        "[15:29] Me: hi how are\n",
         "me"
       ],
       [
-        "[14:28] CED-50: hi\n",
+        "[15:39] Me: Kaam theek tak ho raha hai na\n",
+        "me"
+      ],
+      [
+        "[15:39] Me: hwo are u\n",
+        "me"
+      ],
+      [
+        "[15:40] CED-50: sdfdfsfss\n",
         "peer"
       ],
       [
-        "[14:29] Me: hey\n",
+        "[15:40] Me: Nice to meet u\n",
         "me"
+      ],
+      [
+        "[15:50] CED-50: HI\n",
+        "peer"
+      ],
+      [
+        "[15:53] CED-50: dsfdsfdf\n",
+        "peer"
+      ],
+      [
+        "[15:53] CED-50: sdfsdfdsf\n",
+        "peer"
+      ],
+      [
+        "[15:54] CED-50: sdfsdfdsf\n",
+        "peer"
+      ],
+      [
+        "[15:58] Me: fasd fasdf asd\n",
+        "me"
+      ],
+      [
+        "[15:59] Me: /clear\n",
+        "me"
+      ],
+      [
+        "[16:00] CED-50: sdfsdfdsf\n",
+        "peer"
       ]
     ],
     "192.168.29.69": [
       [
-        "[13:32] Send Failed: HTTPConnectionPool(host='192.168.29.69', port=5000): Max retries exceeded with url: /message (Caused by ConnectTimeoutError(<HTTPConnection(host='192.168.29.69', port=5000) at 0x1d289c4e470>, 'Connection to 192.168.29.69 timed out. (connect timeout=2)'))\n",
-        "error"
+        "[15:47] Me: Bokachoda\n",
+        "me"
       ],
       [
-        "[13:32] Send Failed: HTTPConnectionPool(host='192.168.29.69', port=5000): Max retries exceeded with url: /message (Caused by ConnectTimeoutError(<HTTPConnection(host='192.168.29.69', port=5000) at 0x1d289c4ead0>, 'Connection to 192.168.29.69 timed out. (connect timeout=2)'))\n",
-        "error"
+        "[15:48] DESKTOP-IBASJSR: FOLDER_SHARED: DESKTOP-IBASJSR shared PNG http://192.168.29.69:8000/\n",
+        "peer"
+      ],
+      [
+        "[15:48] DESKTOP-IBASJSR: FOLDER_SHARED: DESKTOP-IBASJSR shared PNG http://192.168.29.69:8000/\n",
+        "peer"
+      ],
+      [
+        "[15:52] DESKTOP-IBASJSR: FOLDER_SHARED: DESKTOP-IBASJSR shared PNG http://192.168.29.69:8000/\n",
+        "peer"
       ]
     ]
   }

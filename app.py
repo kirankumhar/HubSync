@@ -21,20 +21,20 @@ PORT = 5000
 LOCK_PIN = "#kiran1991"
 AUTO_LOCK_MS = 5 * 60 * 1000
 HISTORY_FILE = os.path.join(os.path.dirname(__file__), "hubsync_history.json")
-BG = "#0f172a"
-SURFACE = "#111827"
-SURFACE_2 = "#1f2937"
-TERMINAL_BG = "#020617"
-TERMINAL_TEXT = "#d1fae5"
-TERMINAL_PROMPT = "#22c55e"
-TEXT = "#e5e7eb"
-MUTED = "#94a3b8"
-PRIMARY = "#3b82f6"
-PRIMARY_ACTIVE = "#60a5fa"
-DANGER = "#ef4444"
-SUCCESS = "#22c55e"
-BORDER = "#334155"
-LINK = "#93c5fd"
+BG = "#030712"
+SURFACE = "#050a08"
+SURFACE_2 = "#07130d"
+TERMINAL_BG = "#000000"
+TERMINAL_TEXT = "#9cffb3"
+TERMINAL_PROMPT = "#00ff66"
+TEXT = "#d7ffe2"
+MUTED = "#5ee787"
+PRIMARY = "#00d9ff"
+PRIMARY_ACTIVE = "#67e8f9"
+DANGER = "#ff3b5c"
+SUCCESS = "#00ff66"
+BORDER = "#14532d"
+LINK = "#22d3ee"
 
 # ==========================================
 # FLASK APP
@@ -71,6 +71,7 @@ SYSTEM_CHAT = "__system__"
 current_chat_key = SYSTEM_CHAT
 auto_lock_job = None
 is_locked = False
+notification_popup = None
 
 
 def load_chat_histories():
@@ -200,6 +201,61 @@ def receive_message(sender, msg, sender_ip):
         user_listbox.insert(tk.END, f"{sender} - {sender_ip}")
 
     add_chat_message(f"{sender}: {msg}", sender_ip)
+    show_message_notification(sender, msg)
+
+
+def show_message_notification(sender, msg):
+    global notification_popup
+
+    if notification_popup is not None and notification_popup.winfo_exists():
+        notification_popup.destroy()
+
+    preview = msg if len(msg) <= 70 else f"{msg[:67]}..."
+
+    notification_popup = tk.Toplevel(root)
+    notification_popup.title("HubSync Notification")
+    notification_popup.configure(bg=TERMINAL_BG)
+    notification_popup.overrideredirect(True)
+    notification_popup.attributes("-topmost", True)
+
+    panel = tk.Frame(
+        notification_popup,
+        bg=SURFACE,
+        highlightthickness=1,
+        highlightbackground=TERMINAL_PROMPT,
+        bd=0
+    )
+    panel.pack(fill="both", expand=True)
+
+    tk.Label(
+        panel,
+        text=f"> incoming packet :: {sender}",
+        bg=SURFACE,
+        fg=TERMINAL_PROMPT,
+        font=("Consolas", 10, "bold"),
+        anchor="w",
+        padx=12
+    ).pack(fill="x", pady=(10, 2))
+
+    tk.Label(
+        panel,
+        text=preview,
+        bg=SURFACE,
+        fg=TERMINAL_TEXT,
+        font=("Consolas", 10),
+        anchor="w",
+        justify="left",
+        wraplength=300,
+        padx=12
+    ).pack(fill="x", pady=(0, 10))
+
+    root.update_idletasks()
+    width = 340
+    height = 82
+    x = root.winfo_x() + root.winfo_width() - width - 24
+    y = root.winfo_y() + 48
+    notification_popup.geometry(f"{width}x{height}+{x}+{y}")
+    notification_popup.after(4500, notification_popup.destroy)
 
 
 def make_links_clickable():
@@ -309,6 +365,7 @@ def check_host(ip):
                         f"{username} - {ip}"
                     )
                 )
+                root.after(0, refresh_device_count)
 
     except Exception:
         pass
@@ -321,6 +378,7 @@ def scan_network():
     root.after(0, lambda: scan_btn.config(state="disabled"))
     root.after(0, lambda: status_var.set("Scanning for devices..."))
     root.after(0, lambda: user_listbox.delete(0, tk.END))
+    root.after(0, refresh_device_count)
 
     online_users.clear()
     root.after(0, lambda: add_chat_message("Scanning network..."))
@@ -339,6 +397,7 @@ def scan_network():
     root.after(0, lambda: add_chat_message("Scan completed"))
     root.after(0, lambda: scan_btn.config(state="normal"))
     root.after(0, lambda: status_var.set(f"{len(online_users)} device(s) online"))
+    root.after(0, refresh_device_count)
 
 
 # ==========================================
@@ -355,30 +414,30 @@ def start_scan():
 # GUI
 # ==========================================
 root = tk.Tk()
-root.title(f"HubSync - {USERNAME}")
-root.geometry("860x640")
-root.minsize(720, 520)
+root.title(f"HubSync - Terminal Edition")
+root.geometry("1280x760")
+root.minsize(1040, 640)
 root.configure(bg=BG)
 
 style = ttk.Style(root)
 style.theme_use("clam")
-style.configure(".", font=("Segoe UI", 10), background=BG, foreground=TEXT)
+style.configure(".", font=("Consolas", 10), background=BG, foreground=TEXT)
 style.configure("App.TFrame", background=BG)
 style.configure("Surface.TFrame", background=SURFACE, borderwidth=1, relief="solid")
-style.configure("Header.TLabel", background=BG, foreground=TEXT, font=("Segoe UI", 18, "bold"))
-style.configure("Subtle.TLabel", background=BG, foreground=MUTED, font=("Segoe UI", 10))
-style.configure("Section.TLabel", background=SURFACE, foreground=TEXT, font=("Segoe UI", 10, "bold"))
-style.configure("Muted.TLabel", background=SURFACE, foreground=MUTED, font=("Segoe UI", 9))
-style.configure("Primary.TButton", background=PRIMARY, foreground="white", borderwidth=0, padding=(14, 8))
-style.map("Primary.TButton", background=[("active", PRIMARY_ACTIVE), ("disabled", "#475569")])
-style.configure("Success.TButton", background=SUCCESS, foreground="white", borderwidth=0, padding=(16, 8))
-style.map("Success.TButton", background=[("active", "#4ade80")])
-style.configure("Danger.TButton", background=DANGER, foreground="white", borderwidth=0, padding=(12, 8))
-style.map("Danger.TButton", background=[("active", "#f87171")])
-style.configure("Ghost.TButton", background=SURFACE_2, foreground=TEXT, borderwidth=0, padding=(12, 8))
-style.map("Ghost.TButton", background=[("active", "#374151")])
+style.configure("Header.TLabel", background=BG, foreground=TERMINAL_PROMPT, font=("Consolas", 20, "bold"))
+style.configure("Subtle.TLabel", background=BG, foreground=MUTED, font=("Consolas", 10))
+style.configure("Section.TLabel", background=SURFACE, foreground=TERMINAL_PROMPT, font=("Consolas", 10, "bold"))
+style.configure("Muted.TLabel", background=SURFACE, foreground=MUTED, font=("Consolas", 9))
+style.configure("Primary.TButton", background="#062b2f", foreground=PRIMARY, borderwidth=0, padding=(14, 8))
+style.map("Primary.TButton", background=[("active", "#083f46"), ("disabled", "#0f241d")])
+style.configure("Success.TButton", background="#063018", foreground=SUCCESS, borderwidth=0, padding=(16, 8))
+style.map("Success.TButton", background=[("active", "#0b4a26")])
+style.configure("Danger.TButton", background="#3a0713", foreground=DANGER, borderwidth=0, padding=(12, 8))
+style.map("Danger.TButton", background=[("active", "#5f0b1d")])
+style.configure("Ghost.TButton", background=SURFACE_2, foreground=TERMINAL_TEXT, borderwidth=0, padding=(12, 8))
+style.map("Ghost.TButton", background=[("active", "#0c2618")])
 
-main = ttk.Frame(root, style="App.TFrame", padding=18)
+main = ttk.Frame(root, style="App.TFrame", padding=14)
 main.pack(fill="both", expand=True)
 
 lock_screen = ttk.Frame(root, style="App.TFrame", padding=28)
@@ -452,7 +511,7 @@ ttk.Label(
 ).pack(anchor="center")
 ttk.Label(
     lock_panel,
-    text="Enter PIN to continue",
+    text="AUTH REQUIRED // enter PIN",
     style="Muted.TLabel"
 ).pack(anchor="center", pady=(6, 18))
 
@@ -492,80 +551,168 @@ unlock_btn = ttk.Button(
 unlock_btn.pack(fill="x")
 
 # ==========================================
-# TOP FRAME
+# TERMINAL DASHBOARD
 # ==========================================
-top_frame = ttk.Frame(main, style="App.TFrame")
+def make_panel(parent, title=None, padding=10):
+    frame = tk.Frame(
+        parent,
+        bg=TERMINAL_BG,
+        highlightthickness=1,
+        highlightbackground=TERMINAL_PROMPT,
+        bd=0
+    )
+    if title:
+        tk.Label(
+            frame,
+            text=title,
+            bg=TERMINAL_BG,
+            fg=TERMINAL_PROMPT,
+            font=("Consolas", 11, "bold"),
+            anchor="w",
+            padx=padding
+        ).pack(fill="x", pady=(padding, 6))
+    return frame
+
+
+top_frame = tk.Frame(main, bg=BG)
 top_frame.pack(fill="x")
 
-title_block = ttk.Frame(top_frame, style="App.TFrame")
+title_block = tk.Frame(top_frame, bg=BG)
 title_block.pack(side="left", fill="x", expand=True)
 
-ttk.Label(title_block, text="HubSync", style="Header.TLabel").pack(anchor="w")
-ttk.Label(
+tk.Label(
     title_block,
-    text=f"{USERNAME} on {LOCAL_IP}",
-    style="Subtle.TLabel"
-).pack(anchor="w", pady=(2, 0))
+    text="} HUBSYNC TERMINAL",
+    bg=BG,
+    fg=TERMINAL_PROMPT,
+    font=("Consolas", 20, "bold"),
+    anchor="w"
+).pack(anchor="w")
+tk.Label(
+    title_block,
+    text=f"}} Connected to {LOCAL_IP}",
+    bg=BG,
+    fg=TERMINAL_PROMPT,
+    font=("Consolas", 11),
+    anchor="w"
+).pack(anchor="w")
 
 status_var = tk.StringVar(value="Ready")
-status_label = ttk.Label(top_frame, textvariable=status_var, style="Subtle.TLabel")
-status_label.pack(side="right", padx=(12, 0))
+status_pill = make_panel(top_frame)
+status_pill.pack(side="left", padx=18)
+tk.Label(
+    status_pill,
+    textvariable=status_var,
+    bg=TERMINAL_BG,
+    fg=TERMINAL_TEXT,
+    font=("Consolas", 11),
+    padx=24,
+    pady=12
+).pack()
 
-lock_btn = ttk.Button(
-    top_frame,
-    text="Lock",
-    command=show_lock_screen,
-    style="Ghost.TButton"
-)
-lock_btn.pack(side="right", padx=(0, 10))
+top_actions = tk.Frame(top_frame, bg=BG)
+top_actions.pack(side="right")
 
 scan_btn = ttk.Button(
-    top_frame,
-    text="Scan Devices",
+    top_actions,
+    text="[S] Scan Devices",
     command=start_scan,
     style="Primary.TButton"
 )
-scan_btn.pack(side="right")
+scan_btn.pack(side="left", padx=(0, 10))
 
-# ==========================================
-# DEVICE LIST + CHAT
-# ==========================================
-content = ttk.Frame(main, style="App.TFrame")
+lock_btn = ttk.Button(
+    top_actions,
+    text="[L] Lock",
+    command=show_lock_screen,
+    style="Ghost.TButton"
+)
+lock_btn.pack(side="left", padx=(0, 10))
+
+exit_btn = ttk.Button(
+    top_actions,
+    text="[X] Exit",
+    command=root.destroy,
+    style="Danger.TButton"
+)
+exit_btn.pack(side="left")
+
+content = tk.Frame(main, bg=BG)
 content.pack(fill="both", expand=True, pady=(18, 0))
-content.columnconfigure(0, weight=0, minsize=260)
+content.columnconfigure(0, minsize=270)
 content.columnconfigure(1, weight=1)
+content.columnconfigure(2, minsize=250)
 content.rowconfigure(0, weight=1)
 
-device_panel = ttk.Frame(content, style="Surface.TFrame", padding=12)
-device_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 14))
+left_column = tk.Frame(content, bg=BG)
+left_column.grid(row=0, column=0, sticky="nsew", padx=(0, 12))
+left_column.rowconfigure(0, weight=1)
 
-ttk.Label(device_panel, text="Online Devices", style="Section.TLabel").pack(anchor="w")
-ttk.Label(device_panel, text="Select one or more devices before sending.", style="Muted.TLabel").pack(anchor="w", pady=(2, 10))
+device_panel = make_panel(left_column, "ONLINE DEVICES", padding=10)
+device_panel.grid(row=0, column=0, sticky="nsew")
+tk.Label(
+    device_panel,
+    text="ID  DEVICE NAME        IP ADDRESS\n--------------------------------",
+    bg=TERMINAL_BG,
+    fg="#e6ff99",
+    font=("Consolas", 10),
+    anchor="w",
+    justify="left",
+    padx=10
+).pack(fill="x", pady=(0, 4))
 
 user_listbox = tk.Listbox(
     device_panel,
     height=12,
-    font=("Segoe UI", 10),
-    bg=SURFACE,
-    fg=TEXT,
-    selectbackground=PRIMARY,
-    selectforeground="white",
-    highlightthickness=1,
-    highlightbackground=BORDER,
-    highlightcolor=PRIMARY,
+    font=("Consolas", 10),
+    bg=TERMINAL_BG,
+    fg=TERMINAL_TEXT,
+    selectbackground=TERMINAL_PROMPT,
+    selectforeground=TERMINAL_BG,
+    highlightthickness=0,
     borderwidth=0,
     activestyle="none",
     selectmode=tk.EXTENDED,
     exportselection=False
 )
-user_listbox.pack(fill="both", expand=True)
+user_listbox.pack(fill="both", expand=True, padx=10)
+
+device_total_var = tk.StringVar(value="Total: 0 device(s)")
+tk.Label(
+    device_panel,
+    textvariable=device_total_var,
+    bg=TERMINAL_BG,
+    fg=TERMINAL_PROMPT,
+    font=("Consolas", 10),
+    anchor="w",
+    padx=10,
+    pady=10
+).pack(fill="x")
+
+
+def refresh_device_count():
+    device_total_var.set(f"Total: {user_listbox.size()} device(s)")
+
+menu_panel = make_panel(left_column, "MENU", padding=10)
+menu_panel.grid(row=1, column=0, sticky="ew", pady=(12, 0))
+for menu_text in ("[M] Messages", "[D] Devices", "[P] Phrases", "[S] Settings", "[A] About"):
+    tk.Label(
+        menu_panel,
+        text=menu_text,
+        bg=TERMINAL_BG,
+        fg=TERMINAL_TEXT,
+        font=("Consolas", 10),
+        anchor="w",
+        padx=12,
+        pady=3
+    ).pack(fill="x")
 
 
 def on_device_select(event=None):
     selected = user_listbox.curselection()
 
     if not selected:
-        set_current_chat(SYSTEM_CHAT, "System")
+        set_current_chat(SYSTEM_CHAT, "CHAT ROOM - SYSTEM LOG")
         return
 
     active_index = user_listbox.index("active")
@@ -574,74 +721,58 @@ def on_device_select(event=None):
 
     selected_user = user_listbox.get(active_index)
     target_name, target_ip = selected_user.rsplit(" - ", 1)
-    set_current_chat(target_ip, f"Conversation with {target_name}")
+    set_current_chat(target_ip, f"CHAT ROOM - {target_name} ({target_ip})")
 
 
 user_listbox.bind("<<ListboxSelect>>", on_device_select)
 
-chat_panel = ttk.Frame(content, style="Surface.TFrame", padding=12)
-chat_panel.grid(row=0, column=1, sticky="nsew")
+center_column = tk.Frame(content, bg=BG)
+center_column.grid(row=0, column=1, sticky="nsew")
+center_column.rowconfigure(0, weight=1)
+center_column.columnconfigure(0, weight=1)
+
+chat_panel = make_panel(center_column)
+chat_panel.grid(row=0, column=0, sticky="nsew")
 chat_panel.rowconfigure(1, weight=1)
 chat_panel.columnconfigure(0, weight=1)
 
-conversation_title_var = tk.StringVar(value="System")
-ttk.Label(
+conversation_title_var = tk.StringVar(value="CHAT ROOM - SYSTEM LOG")
+tk.Label(
     chat_panel,
     textvariable=conversation_title_var,
-    style="Section.TLabel"
-).grid(row=0, column=0, sticky="w", pady=(0, 10))
+    bg=TERMINAL_BG,
+    fg=TERMINAL_PROMPT,
+    font=("Consolas", 11, "bold"),
+    anchor="w",
+    padx=12
+).grid(row=0, column=0, sticky="ew", pady=(10, 8))
 
 chat_box = scrolledtext.ScrolledText(
     chat_panel,
-    font=("Consolas", 10),
-    bg=SURFACE_2,
-    fg=TEXT,
+    font=("Consolas", 11),
+    bg=TERMINAL_BG,
+    fg=TERMINAL_TEXT,
     wrap="word",
     relief="flat",
     borderwidth=0,
     padx=12,
     pady=10,
-    insertbackground=TEXT,
-    selectbackground=PRIMARY,
-    selectforeground="white"
+    insertbackground=TERMINAL_PROMPT,
+    selectbackground="#064e3b",
+    selectforeground=TERMINAL_TEXT
 )
-chat_box.grid(row=1, column=0, sticky="nsew")
-chat_box.tag_config("me", foreground=PRIMARY)
-chat_box.tag_config("peer", foreground=TEXT)
-chat_box.tag_config("system", foreground=MUTED)
+chat_box.grid(row=1, column=0, sticky="nsew", padx=8, pady=(0, 8))
+chat_box.tag_config("me", foreground="#ff4dff")
+chat_box.tag_config("peer", foreground="#38bdf8")
+chat_box.tag_config("system", foreground=TERMINAL_PROMPT)
 chat_box.tag_config("error", foreground=DANGER)
 
-# ==========================================
-# MESSAGE FRAME
-# ==========================================
-bottom_frame = ttk.Frame(main, style="App.TFrame")
-bottom_frame.pack(fill="x", pady=(14, 0))
+bottom_frame = make_panel(center_column)
+bottom_frame.grid(row=1, column=0, sticky="ew", pady=(12, 0))
 bottom_frame.columnconfigure(0, weight=1)
 
-terminal_input = tk.Frame(
-    bottom_frame,
-    bg=TERMINAL_BG,
-    highlightthickness=1,
-    highlightbackground=BORDER,
-    highlightcolor=TERMINAL_PROMPT,
-    bd=0
-)
-terminal_input.grid(row=0, column=0, sticky="ew")
-terminal_input.columnconfigure(1, weight=1)
-
-prompt_label = tk.Label(
-    terminal_input,
-    text=">",
-    font=("Consolas", 15, "bold"),
-    bg=TERMINAL_BG,
-    fg=TERMINAL_PROMPT,
-    padx=10,
-    pady=8
-)
-prompt_label.grid(row=0, column=0, sticky="nw")
-
 msg_entry = tk.Text(
-    terminal_input,
+    bottom_frame,
     height=3,
     font=("Consolas", 11),
     wrap="word",
@@ -650,29 +781,74 @@ msg_entry = tk.Text(
     relief="flat",
     borderwidth=0,
     highlightthickness=0,
-    padx=0,
-    pady=8,
+    padx=12,
+    pady=10,
     insertbackground=TERMINAL_PROMPT,
-    selectbackground=PRIMARY,
-    selectforeground="white"
+    selectbackground="#064e3b",
+    selectforeground=TERMINAL_TEXT
 )
-msg_entry.grid(row=0, column=1, sticky="ew")
+msg_entry.grid(row=0, column=0, sticky="ew", padx=6, pady=(6, 0))
+tk.Label(
+    bottom_frame,
+    text="Enter: Send  |  @send: Send  |  /clear: Clear Chat",
+    bg=TERMINAL_BG,
+    fg=TERMINAL_PROMPT,
+    font=("Consolas", 9, "bold"),
+    anchor="w",
+    padx=12
+).grid(row=1, column=0, sticky="ew", pady=(0, 8))
 
-actions = ttk.Frame(bottom_frame, style="App.TFrame")
-actions.grid(row=0, column=1, sticky="ns", padx=(10, 0))
+right_column = tk.Frame(content, bg=BG)
+right_column.grid(row=0, column=2, sticky="nsew", padx=(12, 0))
+
+actions_panel = make_panel(right_column, "QUICK ACTIONS", padding=10)
+actions_panel.pack(fill="x")
+actions = tk.Frame(actions_panel, bg=TERMINAL_BG)
+actions.pack(fill="x", padx=10, pady=(16, 10))
 
 send_btn = ttk.Button(
-    actions,
-    text="Send",
+    bottom_frame,
+    text="SEND [ENTER]",
     command=send_message,
     style="Success.TButton"
 )
-send_btn.pack(fill="x")
+send_btn.grid(row=0, column=1, sticky="e", padx=(8, 12), pady=12)
+
+status_panel = make_panel(right_column, "STATUS", padding=10)
+status_panel.pack(fill="x", pady=(18, 0))
+for label, value in (
+    ("Network:", "Connected"),
+    ("Sharing:", "Active"),
+    ("Firewall:", "OK"),
+    ("Encryption:", "Enabled"),
+):
+    row = tk.Frame(status_panel, bg=TERMINAL_BG)
+    row.pack(fill="x", padx=12, pady=7)
+    tk.Label(row, text=label, bg=TERMINAL_BG, fg=TERMINAL_TEXT, font=("Consolas", 10), width=12, anchor="w").pack(side="left")
+    tk.Label(row, text=value, bg=TERMINAL_BG, fg=TERMINAL_PROMPT, font=("Consolas", 10, "bold"), anchor="w").pack(side="left")
+
+footer = tk.Frame(main, bg=BG)
+footer.pack(fill="x", pady=(12, 0))
+tk.Label(
+    footer,
+    text=">> HubSync Terminal Edition v1.0.0",
+    bg=BG,
+    fg=TERMINAL_PROMPT,
+    font=("Consolas", 9),
+    anchor="w"
+).pack(side="left")
+tk.Label(
+    footer,
+    text=">> Secure   |   Fast   |   Local Network",
+    bg=BG,
+    fg=TERMINAL_TEXT,
+    font=("Consolas", 9),
+).pack(side="left", expand=True)
 
 
 def open_emoji_picker():
     picker = tk.Toplevel(root)
-    picker.title("Quick Phrases")
+    picker.title("Payload Snippets")
     picker.configure(bg=BG)
     picker.transient(root)
     picker.resizable(False, False)
@@ -700,7 +876,7 @@ def open_emoji_picker():
 
 emoji_btn = ttk.Button(
     actions,
-    text="Phrases",
+    text="Snippets",
     command=open_emoji_picker,
     style="Ghost.TButton"
 )
@@ -715,7 +891,7 @@ def clear_chat():
 
 clear_btn = ttk.Button(
     actions,
-    text="Clear Chat",
+    text="Purge Log",
     command=clear_chat,
     style="Ghost.TButton"
 )
@@ -784,7 +960,7 @@ def share_folder():
 
 share_btn = ttk.Button(
     actions,
-    text="Share Folder",
+    text="Share Dir",
     command=share_folder,
     style="Primary.TButton"
 )
@@ -792,7 +968,7 @@ share_btn.pack(fill="x", pady=(8, 0))
 
 stop_share_btn = ttk.Button(
     actions,
-    text="Stop Sharing",
+    text="Stop Share",
     command=stop_all_shares,
     style="Danger.TButton"
 )
@@ -804,7 +980,22 @@ def on_ctrl_enter(event=None):
     return "break"
 
 
+def on_message_input(event=None):
+    message_text = msg_entry.get("1.0", tk.END).strip()
+
+    if not message_text.endswith("@send"):
+        return
+
+    message_text = message_text[:-5].rstrip()
+    msg_entry.delete("1.0", tk.END)
+
+    if message_text:
+        msg_entry.insert("1.0", message_text)
+        send_message()
+
+
 msg_entry.bind("<Control-Return>", on_ctrl_enter)
+msg_entry.bind("<KeyRelease>", on_message_input)
 
 
 def on_close():
