@@ -19,6 +19,7 @@ from flask import Flask, jsonify, request
 # ==========================================
 PORT = 5000
 LOCK_PIN = "#kiran1991"
+AUTO_LOCK_MS = 5 * 60 * 1000
 HISTORY_FILE = os.path.join(os.path.dirname(__file__), "hubsync_history.json")
 BG = "#0f172a"
 SURFACE = "#111827"
@@ -68,6 +69,8 @@ LOCAL_IP = get_local_ip()
 online_users = {}
 SYSTEM_CHAT = "__system__"
 current_chat_key = SYSTEM_CHAT
+auto_lock_job = None
+is_locked = False
 
 
 def load_chat_histories():
@@ -382,12 +385,25 @@ lock_screen = ttk.Frame(root, style="App.TFrame", padding=28)
 
 
 def show_main_screen():
+    global is_locked
+
+    is_locked = False
     lock_screen.pack_forget()
     main.pack(fill="both", expand=True)
     msg_entry.focus_set()
+    reset_auto_lock_timer()
 
 
 def show_lock_screen():
+    global auto_lock_job, is_locked
+
+    if is_locked:
+        return
+
+    is_locked = True
+    if auto_lock_job is not None:
+        root.after_cancel(auto_lock_job)
+        auto_lock_job = None
     main.pack_forget()
     lock_error_var.set("")
     lock_pin_var.set("")
@@ -404,6 +420,23 @@ def unlock_app(event=None):
     lock_pin_var.set("")
     lock_entry.focus_set()
     return "break"
+
+
+def reset_auto_lock_timer(event=None):
+    global auto_lock_job
+
+    if is_locked:
+        return
+
+    if auto_lock_job is not None:
+        root.after_cancel(auto_lock_job)
+
+    auto_lock_job = root.after(AUTO_LOCK_MS, show_lock_screen)
+
+
+def lock_when_minimized(event=None):
+    if root.state() == "iconic":
+        show_lock_screen()
 
 
 lock_screen.columnconfigure(0, weight=1)
@@ -522,7 +555,8 @@ user_listbox = tk.Listbox(
     highlightcolor=PRIMARY,
     borderwidth=0,
     activestyle="none",
-    selectmode=tk.EXTENDED
+    selectmode=tk.EXTENDED,
+    exportselection=False
 )
 user_listbox.pack(fill="both", expand=True)
 
@@ -779,6 +813,10 @@ def on_close():
 
 
 root.protocol("WM_DELETE_WINDOW", on_close)
+root.bind_all("<KeyPress>", reset_auto_lock_timer)
+root.bind_all("<ButtonPress>", reset_auto_lock_timer)
+root.bind_all("<MouseWheel>", reset_auto_lock_timer)
+root.bind("<Unmap>", lock_when_minimized)
 
 # ==========================================
 # START FLASK SERVER THREAD

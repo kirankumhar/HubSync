@@ -16,11 +16,91 @@
       [
         "[13:30] Scan completed\n",
         "system"
+      ],
+      [
+        "[14:27] Server started\n",
+        "system"
+      ],
+      [
+        "[14:27] My IP: 192.168.29.23\n",
+        "peer"
+      ],
+      [
+        "[14:27] Scanning network...\n",
+        "system"
+      ],
+      [
+        "[14:27] Scan completed\n",
+        "system"
+      ],
+      [
+        "[14:28] Scanning network...\n",
+        "system"
+      ],
+      [
+        "[14:28] Scan completed\n",
+        "system"
+      ],
+      [
+        "[14:29] Server started\n",
+        "system"
+      ],
+      [
+        "[14:29] My IP: 192.168.29.23\n",
+        "peer"
+      ],
+      [
+        "[14:29] Scanning network...\n",
+        "system"
+      ],
+      [
+        "[14:29] Scan completed\n",
+        "system"
+      ],
+      [
+        "[15:03] Scanning network...\n",
+        "system"
+      ],
+      [
+        "[15:03] Scan completed\n",
+        "system"
+      ],
+      [
+        "[15:08] Server started\n",
+        "system"
+      ],
+      [
+        "[15:08] My IP: 192.168.29.23\n",
+        "peer"
+      ],
+      [
+        "[15:08] Scanning network...\n",
+        "system"
+      ],
+      [
+        "[15:08] Scan completed\n",
+        "system"
+      ],
+      [
+        "[15:09] Scanning network...\n",
+        "system"
+      ],
+      [
+        "[15:09] Scan completed\n",
+        "system"
       ]
     ],
     "192.168.29.32": [
       [
         "[13:32] Me: Hello\n",
+        "me"
+      ],
+      [
+        "[14:28] CED-50: hi\n",
+        "peer"
+      ],
+      [
+        "[14:29] Me: hey\n",
         "me"
       ]
     ],
