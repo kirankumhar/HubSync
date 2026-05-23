@@ -1,0 +1,38 @@
+{
+  "histories": {
+    "__system__": [
+      [
+        "[13:30] Server started\n",
+        "system"
+      ],
+      [
+        "[13:30] My IP: 192.168.29.23\n",
+        "peer"
+      ],
+      [
+        "[13:30] Scanning network...\n",
+        "system"
+      ],
+      [
+        "[13:30] Scan completed\n",
+        "system"
+      ]
+    ],
+    "192.168.29.32": [
+      [
+        "[13:32] Me: Hello\n",
+        "me"
+      ]
+    ],
+    "192.168.29.69": [
+      [
+        "[13:32] Send Failed: HTTPConnectionPool(host='192.168.29.69', port=5000): Max retries exceeded with url: /message (Caused by ConnectTimeoutError(<HTTPConnection(host='192.168.29.69', port=5000) at 0x1d289c4e470>, 'Connection to 192.168.29.69 timed out. (connect timeout=2)'))\n",
+        "error"
+      ],
+      [
+        "[13:32] Send Failed: HTTPConnectionPool(host='192.168.29.69', port=5000): Max retries exceeded with url: /message (Caused by ConnectTimeoutError(<HTTPConnection(host='192.168.29.69', port=5000) at 0x1d289c4ead0>, 'Connection to 192.168.29.69 timed out. (connect timeout=2)'))\n",
+        "error"
+      ]
+    ]
+  }
+}

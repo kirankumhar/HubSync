@@ -1,4 +1,5 @@
 import functools
+import json
 import os
 import re
 import socket
@@ -18,6 +19,7 @@ from flask import Flask, jsonify, request
 # ==========================================
 PORT = 5000
 LOCK_PIN = "#kiran1991"
+HISTORY_FILE = os.path.join(os.path.dirname(__file__), "hubsync_history.json")
 BG = "#0f172a"
 SURFACE = "#111827"
 SURFACE_2 = "#1f2937"
@@ -65,10 +67,53 @@ LOCAL_IP = get_local_ip()
 # ==========================================
 online_users = {}
 SYSTEM_CHAT = "__system__"
-chat_histories = {
-    SYSTEM_CHAT: []
-}
 current_chat_key = SYSTEM_CHAT
+
+
+def load_chat_histories():
+    if not os.path.exists(HISTORY_FILE):
+        return {SYSTEM_CHAT: []}
+
+    try:
+        with open(HISTORY_FILE, "r", encoding="utf-8") as file:
+            data = json.load(file)
+    except (OSError, json.JSONDecodeError):
+        return {SYSTEM_CHAT: []}
+
+    histories = {}
+    for chat_key, messages in data.get("histories", {}).items():
+        if not isinstance(chat_key, str) or not isinstance(messages, list):
+            continue
+
+        clean_messages = []
+        for item in messages:
+            if (
+                isinstance(item, list)
+                and len(item) == 2
+                and isinstance(item[0], str)
+                and isinstance(item[1], str)
+            ):
+                clean_messages.append((item[0], item[1]))
+
+        histories[chat_key] = clean_messages
+
+    histories.setdefault(SYSTEM_CHAT, [])
+    return histories
+
+
+def save_chat_histories():
+    data = {
+        "histories": chat_histories
+    }
+
+    try:
+        with open(HISTORY_FILE, "w", encoding="utf-8") as file:
+            json.dump(data, file, indent=2)
+    except OSError:
+        pass
+
+
+chat_histories = load_chat_histories()
 
 # ==========================================
 # FLASK ROUTES
@@ -121,6 +166,7 @@ def add_chat_message(text, chat_key=SYSTEM_CHAT):
     line = f"[{timestamp}] {text}\n"
     tag = get_message_tag(text)
     chat_histories.setdefault(chat_key, []).append((line, tag))
+    save_chat_histories()
 
     if chat_key == current_chat_key:
         render_chat_history()
@@ -186,7 +232,7 @@ def start_server():
             use_reloader=False
         )
     except Exception as e:
-        add_chat_message(f"Server Error: {e}")
+        root.after(0, lambda: add_chat_message(f"Server Error: {e}"))
 
 
 # ==========================================
@@ -274,7 +320,7 @@ def scan_network():
     root.after(0, lambda: user_listbox.delete(0, tk.END))
 
     online_users.clear()
-    add_chat_message("Scanning network...")
+    root.after(0, lambda: add_chat_message("Scanning network..."))
 
     base_ip = ".".join(LOCAL_IP.split(".")[:-1])
 
@@ -287,7 +333,7 @@ def scan_network():
 
             executor.submit(check_host, ip)
 
-    add_chat_message("Scan completed")
+    root.after(0, lambda: add_chat_message("Scan completed"))
     root.after(0, lambda: scan_btn.config(state="normal"))
     root.after(0, lambda: status_var.set(f"{len(online_users)} device(s) online"))
 
@@ -629,6 +675,7 @@ emoji_btn.pack(fill="x", pady=(8, 0))
 
 def clear_chat():
     chat_histories[current_chat_key] = []
+    save_chat_histories()
     chat_box.delete("1.0", tk.END)
 
 
@@ -724,6 +771,14 @@ def on_ctrl_enter(event=None):
 
 
 msg_entry.bind("<Control-Return>", on_ctrl_enter)
+
+
+def on_close():
+    save_chat_histories()
+    root.destroy()
+
+
+root.protocol("WM_DELETE_WINDOW", on_close)
 
 # ==========================================
 # START FLASK SERVER THREAD
